@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>CS 44800: Assignment 1</title>
+  </head>
+  <body>
+<h1>Assignment 1</h1>
+<font color="red">Due: Sunday, February 15, 11:59 pm</font><br>
+(no late submission is accepted, solutions will be released after the due date)
+    <h2>1. ER Diagram (25%)</h2>
+Computer Sciences Department frequent fliers have been complaining to
+Dane County Airport officials about the poor organization at the airport. As a result,
+the officials decided that all information related to the airport should be organized
+using a DBMS, and you have been hired to design the database. Your first task is
+to organize the information about all the airplanes stationed and maintained at the
+airport. The relevant information is as follows:
+<ul>
+<li>Every airplane has a registration number, and each airplane is of a specific model.</li>
+<li>The airport accommodates a number of airplane models, and each model is identified by a model number (e.g., DC-10) and has a capacity and a weight.</li>
+<li>A number of technicians work at the airport. You need to store the name, SSN, address, phone number, and salary of each technician.</li>
+<li>Each technician is an expert on one or more plane model(s), and his or her expertise may overlap with that of other technicians. This information about technicians must also be recorded.</li>
+<li>Traffic controllers must have an annual medical examination. For each traffic controller, you must store the date of the most recent exam.</li>
+<li>All airport employees (including technicians) belong to a union. You must store the union membership number of each employee. You can assume that each employee is uniquely identified by a social security number.</li>
+<li>The airport has a number of tests that are used periodically to ensure that airplanes are still airworthy. Each test has a Federal Aviation Administration (FAA) test number, a name, and a maximum possible score.</li>
+<li>The FAA requires the airport to keep track of each time a given airplane is tested by a given technician using a given test. For each testing event, the information needed is the date, the number of hours the technician spent doing the test, and the score the airplane received on the test.</li>
+</ul>
+
+<ol>
+<li>Draw an ER diagram for the airport database. Be sure to indicate the various attributes of each entity and relationship set; also specify the key and participation constraints for each relationship set. Specify any necessary overlap and covering constraints as well (in English).</li>
+<li>The FAA passes a regulation that tests on a plane must be conducted by a technician who is an expert on that model. How would you express this constraint in the ER diagram? If you cannot express it, explain briefly.</li>
+</ol>
+<h2>2. Relational Model (25%)</h2>
+Translate your ER diagram from the previous section into a relational schema, and show the SQL statements needed to create the relations, using only key and null constraints. If your translation cannot capture any constraints in the ER diagram, explain why. 
+In the previous section, you also modified the ER diagram to include the constraint that tests on a plane must be conducted by a technician who is an expert on that model. Can you modify the SQL statements defining the relations obtained by mapping the ER diagram to check this constraint?
+<h2>3. Relational Algebra & Calculus & SQL</h2>
+You are given the following schema:<br>
+
+Show(<u>title:string</u>, hname:string, attendance:integer,artist:string)<br>
+title is the title of a show<br>
+hname is the hall name where a show took place<br>
+attendance is the # of spectators<br>
+artist is the name of artist who performed in a show.<br><br>
+
+Hall(<u>hname:string</u>,cname:string,capacity:integer)<br>
+hname is the name of a hall<br>
+cname is the city name where a hall is located<br>
+capacity is the capacity of a hall<br><br>
+
+City(<u>cname:string</u>,country:string,state:string)<br>
+cname is a city name<br>
+country is the contry of a city<br>
+state is the state of a city<br><br>
+
+Below is a set of database queries written in English. Express these queries using relational algebra, domain relational calculus and SQL.
+<ol>
+<li>List names of concerts halls in Chicago whose capacity exceeds 10,000. (7%)</li>
+<li>List names of artists who performed before at least 10,000 spectators, together with cities where those performance took place. (7%)</li>
+<li>Find all the states in USA where Springsteen has performed. (7%)</li>
+<li>Find all the artists who performed at least two times in Chicago. (7%)</li>
+<li>List shows that played in every city in Indiana. (8%)</li>
+<li>Find artists who performed only in Chicago or West Lafayette. (7%)</li>
+<li>Find artists all of whose shows are sold out.     (7%)</li>   
+</ol>
+
+<h2>What to Submit</h2>
+
+Name your file as your_career_login_assignment1.pdf which contains all the answers.
+
+<h2>How to submit your .pdf file</h2>
+
+Use BlackBoard to submit your homework.
+
+</table> 
+  </body>
+</html>

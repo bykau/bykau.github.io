@@ -1,0 +1,67 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>CS 44800: Assignment 2</title>
+  </head>
+  <body>
+<h1>Assignment 2</h1>
+<font color="red">Due: Sunday, March 22, 11:59 pm</font><br>
+(no late submission is accepted, solutions will be released after the due date)
+    <h2>Storage and Indexing (25%)</h2>
+Consider the following relation:<br>
+Emp(<u>eid: integer</u>, sal: integer, age: real, did: integer)<br>
+There is a clustered index on eid and an unclustered index on age.
+<ol>
+<li>How would you use the indexes to enforce the constraint that eid is a key?</li>
+<li>Give an example of an update that is definitely speeded up because of the available
+indexes. (English description is sufficient.)</li>
+<li>Give an example of an update that is definitely slowed down because of the indexes.
+(English description is sufficient.)</li>
+<li>Can you give an example of an update that is neither speeded up nor slowed down
+by the indexes?</li>
+</ol>
+
+<h2>Disks and Files (25%)</h2>
+Consider a disk with a sector size of 512 bytes, 2000 tracks per surface, 50 sectors per track, five double-sided platters, and average seek time of 10 msec. The disk platters rotate at 5400rpm therefore the maximum rotational delay is 0.011 seconds (the average rotation delay is 0.006 seconds). The transfer time is the time to rotate over the block. In our case, the transfer time of one track of data is 0.011 seconds. Suppose that a block size of 1024 bytes is chosen. Suppose that a file containing 100,000 records of 100 bytes each is to be stored on such a disk and that no record is allowed to span two blocks.
+<ol>
+<li>How many records fit onto a block?</li>
+<li>How many blocks are required to store the entire file? If the file is arranged sequentially on the disk, how many surfaces are needed?</li>
+<li>How many records of 100 bytes each can be stored using this disk?</li>
+<li>If pages are stored sequentially on disk, with page 1 on block 1 of track 1, what page is stored on block 1 of track 1 on the next disk surface? How would your answer change if the disk were capable of reading and writing from all heads in parallel?</li>
+<li>What time is required to read a file containing 100,000 records of 100 bytes each sequentially? Again, how would your answer change if the disk were capable of reading/writing from all heads in parallel (and the data was arranged optimally)?</li>
+<li>What is the time required to read a file containing 100,000 records of 100 bytes each in a random order? To read a record, the block containing the record has to be fetched from disk. Assume that each block request incurs the average seek time and rotational delay.</li>
+</ol>
+
+
+<h2>Tree-Structured Indexing (25%)</h2>
+Assume that you have just built a dense B+ tree index using Alternative (2) on a heap file containing 20,000 records. The key field for this B+ tree index is a 40-byte string, and it is a candidate key. Pointers (i.e., record ids and page ids) are (at most) 10-byte values. The size of one disk page is 1000 bytes. The index was built in a bottom-up fashion using the bulk-loading algorithm, and the nodes at each level were filled up as much as possible.
+<ol>
+<li>How many levels does the resulting tree have?</li>
+<li>For each level of the tree, how many nodes are at that level?</li>
+<li>How many levels would the resulting tree have if key compression is used and it
+reduces the average size of each key in an entry to 10 bytes?</li>
+<li>How many levels would the resulting tree have without key compression but with all pages 70 percent full?</li>
+</ol>
+
+<h2>Hash-Based Indexing (25%)</h2>
+Answer the following questions about Linear Hashing:
+<ol> 
+<li>How does Linear Hashing provide an average-case search cost of only slightly more than one disk I/O, given that overflow buckets are part of its data structure?</li>
+<li>Does Linear Hashing guarantee at most one disk access to retrieve a record with a given key value?</li>
+<li>If a Linear Hashing index using Alternative (1) for data entries contains N records, with P records per page and an average storage utilization of 80 percent, what is the worst-case cost for an equality search? Under what conditions would this cost be the actual search cost?</li>
+<li>If the hash function distributes data entries over the space of bucket numbers in a very skewed (non-uniform) way, what can you say about the space utilization in data pages?</li>
+</ol>
+
+<h2>What to Submit</h2>
+
+Name your file as your_career_login_assignment2.pdf which contains all the answers.
+
+<h2>How to submit your .pdf file</h2>
+
+Use BlackBoard to submit your homework.
+
+</table> 
+  </body>
+</html>
+

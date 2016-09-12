@@ -1,0 +1,39 @@
+<html>
+<head>
+<title>Mining Corporate History with the US Trademark dataset</title>
+</head>
+<body>
+<h1>Mining Corporate History with the US Trademark dataset</h1>
+
+<h2>Dataset</h2>
+<a href="http://www.uspto.gov/learning-and-resources/electronic-data-products/trademark-case-files-dataset-0">Trademark Case Files Dataset</a> from the United States Patent and Trademark Office (1.79GB)
+
+<h2>Technologies & Algorithms</h2> 
+Java, MySQL, graphviz, data mining, dynamic programming, Steiner tree, RDF
+
+<h2>Project Description</h2>
+The project aims to extract the corporate history of all US companies based on the USPTO trademark dataset. 
+If some change in ownership occurs the corresponding trademarks have to be 
+re-registered accordingly. For instance, in the domain of
+corporate mergers, acquisitions and spin-offs, one can observe how the intellectual property is
+allocated among its owners throughout time. The United States Patent and Trademark Office
+provides a set of trademarks along with the lists of their owners. By using the
+reallocation of trademark I wrote a data mining algorithm which extracts 16K 
+unique companies, 200K attributes along its evolution history. The evolution 
+graphs are visualized with the GraphViz library.
+
+<h2>Results</h2>
+A number of extracted corporate histories are shown below (clickable).</br>
+<h3>AT&T Corp:</h3>
+<a href="./att.jpg"><img src="./att.jpg" width="500"></img></a>
+<h3>Microsoft:</h3>
+<a href="./att.jpg"><img src="./microsoft.png" width="500"></img></a>
+<h2>Code & Publications</h2>
+<a href="https://github.com/bykau/steiner-forest">https://github.com/bykau/steiner-forest</a></br></br>
+Bykau, S., Rizzolo, F., & Velegrakis, Y. A Query Answering System for Data with Evolution Relationships. SIGMOD 2013<br>		 		   
+Bykau, S., Mylopoulos, J., Rizzolo, F., & Velegrakis, Y. On Modeling and Querying Concept Evolution. Journal on Data Semantics 2012<br>		 
+Bykau, S., Mylopoulos, J., Rizzolo, F., & Velegrakis, Y. Supporting Queries Spanning Across Phases of Evolving Artifacts using Steiner Forests. CIKM 2011</a><br>		 
+Katifori, A., Nikolaou, C., Platakis, M., Ioannidis, Y., Tympas, A., Koubarakis, M., Sarris, N., et al. The Papyrus digital library: discovering history in the news. TPDL 2011<br>
+Bykau S., Kiyavitskaya N., Tsinaraki C., Velegrakis Y. Bridging the gap between heterogeneous and semantically diverse content of different disciplines. In FlexDBIST. 2010<br>
+</body>
+</html>

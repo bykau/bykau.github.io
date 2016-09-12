@@ -1,0 +1,354 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>CS 44800: Project 2</title>
+  </head>
+  <body>
+<h1>Project 2: The RDBMS Lower-Level Layers</h1>
+<font color="red">Due: Sunday, April 5, 11:59 pm</font><br>
+    <h2>Introduction</h2>
+This programming assignment (and subsequent programming assignments) should be carried out in <b>groups of two</b>. Choose a partner as soon as possible; you can Piazza or mail to <a href="mailto:manig@purdue.edu">Ganapathy Mani</a> and we will help you find a partner (<b>You can work and submit individually if you want to</b>).</br>
+
+This project and those to come will be based on Minibase, a small relational DBMS, structured into several layers. In this project, you are required to implement parts of&nbsp;the lower-level layers: BM - the buffer 
+manager layer and Layer HFPage - the </span>heap file layer. Layers should be tested and turned in separately.  
+  
+<h2>1: The Buffer Manager (50 points)</h2>
+<p class="MsoNormal" style="margin-top:12.0pt;margin-right:0in;margin-bottom:  
+3.0pt;margin-left:0in;line-height:15.0pt;mso-line-height-rule:exactly;  
+mso-outline-level:2"><b style="mso-bidi-font-weight:normal">
+<span style="font-size:16.0pt;mso-bidi-font-size:10.0pt;font-family:Arial;layout-grid-mode:  
+line" lang="EN-US">1. Introduction</span></b></p>    
+  
+<p>In this assignment, you will implement a simplified version of the Buffer 
+Manager layer, without support for concurrency control or recovery. You will be 
+given the code for the lower layer, the Disk Space Manager. </p>
+<p>You should begin by reading the chapter on Disks and Files, especially 
+section 9.4, to get an 
+overview of buffer management. This material will also be covered in class. In 
+addition, HTML documentation is available for Minibase. There is a link to the Minibase home page <font color="#0000FF"><b>
+<a href="http://www.cs.wisc.edu/coral/minibase/minibase.html">here</a></b></font>. In particular, you should read the description of the DB class, 
+which you will call extensively in this assignment. The Java documentation for 
+the <em>diskmgr</em> package can be found <font color="#0000FF"><b>
+<a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project2/files/javadoc1/packages.html">here</a></b></font>. 
+You should also read the code under diskmgr/ carefully to learn how package is 
+declared and how Exceptions are handled in Minibase.</p>
+<pre><span style="font-size: 16pt" lang="en-us"><b><span style="font-family: Arial">2. Where to Find Makefiles, Code, etc.</span></b></span></pre>
+<p>Please copy this file (<a style="color: blue; text-decoration: underline; text-underline: single" href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project2/files/project2part1.tar.gz">project2part1.tar.gz</a>) 
+into your own Unix local directory. The directory lib contains the jar file that 
+implements the disk manager, you will use this file to compile your code. The 
+content of the directory src is: </p>
+<ul>
+	<li><font face="Times New Roman">under <em>bufmgr</em> directory <br>
+	You should have all your code for <em>bufmgr</em> package implemented under 
+	this directory. We provide a sample <em>Makefile</em> to compile your 
+	project. You will have to set up any dependencies by editing this file. You 
+	can also design your own Makefile. Whatever you do, please make sure that 
+	the classpath is set to the one provided in the original Makefile. We also 
+	provide a skeleton code for <i>BufMgr.java</i>. The methods that you have to 
+	implement are described in this skeleton code. <b>Please read the commented 
+	descriptions carefully</b>.</font></li>
+	<li><font face="Times New Roman">under <em>diskmgr</em> directory <br>
+	You should study the code for <em>diskmgr</em> package carefully before you 
+	implement the <em>bufmgr</em> package. The detailed description of the files 
+	are not included. Please refer to the java documentation of the packages. 
+	You don't need to compile/use these files directly, instead use the jar file 
+	provided under lib.</font></li>
+	<li><font face="Times New Roman">under <em>tests</em> directory <br>
+	<em>Makefile</em>, <em>TestDriver.java</em>, <em>BMTest.java</em>: Buffer 
+	manager test driver program. Note that you do have to use the Makefile to 
+	run your tests too. Note also that you need to change the test file <em>BMTest.java</em> to select the replacement policy you will implement. </font></li>
+</ul>
+<p>You can find other useful information by reading the java documentation on 
+other packages, such as the <em>global</em> package and the <em>chainexception</em> 
+package. </p>
+<p class="MsoNormal" style="margin-top:12.0pt;margin-right:0in;margin-bottom:  
+3.0pt;margin-left:0in;line-height:15.0pt;mso-line-height-rule:exactly;  
+mso-outline-level:2"><span style="font-size: 16pt" lang="en-us"><b>
+<span style="font-family: Arial">3. The Buffer Manager Interface</span></b></span></p>
+<p>The simplified Buffer Manager interface that you will implement in this 
+assignment allows a client (a higher level program that calls the Buffer 
+Manager) to allocate/de-allocate pages on disk, to bring a disk page into the 
+buffer pool and pin it, and to unpin a page in the buffer pool. </p>
+<p>The methods that you have to implement are described in the skeleton code <i>
+BufMgr.java</i>. Find the file in "<font face="Courier New" size="2">project2part1/src/bufmgr/BufMgr.java</font>". 
+<b>Read the 
+method descriptions carefully and work on that file</b>.</p>
+<pre><span style="font-size: 16pt" lang="en-us"><b><span style="font-family: Arial">4. Internal Design</span></b></span></pre>
+<p>The <em>buffer pool</em> is a collection of <em>frames</em> (page-sized 
+sequence of main memory bytes) that is managed by the Buffer Manager. 
+Conceptually, it should be stored as an array bufPool[numbuf] of Page objects. 
+However, due to the limitation of Java language, it is not feasible to declare 
+an array of Page objects and later on writing string (or other primitive values) 
+to the defined Page. To get around the problem, we have defined our Page as an 
+array of bytes and deal with buffer pool at the byte array level. Therefore, 
+when implement your constructor for the BufMgr class, you should declare the 
+buffer pool as <em>bufpool[numbuf][page_size]</em>. Note that the size of 
+minibase pages is defined in the interface <em>GlobalConst</em> of the <em>
+global</em> package. Before jump into coding, please make sure that you 
+understand how Page object is defined and manipulated in Java minibase. </p>
+<p>In addition, you should maintain an array bufDescr[numbuf] of <em>descriptors</em>, 
+one per frame. Each descriptor is a record with the following fields: </p>
+<blockquote>
+	<font face="Courier New">
+	<em>page number, pin_count, dirtybit</em>.</font> 
+</blockquote>
+<font face="Times New Roman">The <em>pin_count</em> field is an integer, <em>page number</em> is a PageId 
+object, and <em>dirtybit</em> is a boolean. This describes the page that is 
+stored in the corresponding frame. A page is identified by a <em>page number</em> 
+that is generated by the DB class when the page is allocated, and is unique over 
+all pages in the database. The PageId type is defined as an integer type in 
+<i>global</i> package.</font><p>A simple <em>hash table</em> should be used to figure out what frame a given 
+disk page occupies. The hash table should be implemented (entirely in main 
+memory) by using an array of pointers to lists of&nbsp; &lt;<em>page number, frame number</em>
+&gt; 
+pairs. The array is called the <em>directory</em> and each list of pairs is 
+called a <em>bucket</em>. Given a <em>page number</em>, you should apply a <em>
+hash function</em> to find the directory entry pointing to the bucket that 
+contains the frame number for this page, if the page is in the buffer pool. If 
+you search the bucket and don't find a pair containing this page number, the 
+page is not in the pool. If you find such a pair, it will tell you the frame in 
+which the page resides. This is illustrated in the next figure. </p>
+<p><img src="/homes/sbykau/cs448/img3.gif" height="334" width="775" border="0"></p>
+<p>The hash function must distribute values in the domain of the search field 
+uniformly over the collection of buckets. If we have HTSIZE buckets, numbered 0 
+through M-1, a hash function <i>h</i> of the form</p>
+<p><i>h</i>(<i>value</i>)&nbsp;=&nbsp;(<i>a</i>*<i>value</i>+<i>b</i>)&nbsp;<i>mod</i>&nbsp;<i>HTSIZE</i></p>
+<p>works well in practice. HTSIZE should be chosen to be a prime number. </p>
+<p>When a page is requested the buffer manager should do the following: </p>
+<dl compact="compact">
+	<dt>1. </dt>
+	<dd><font face="Times New Roman">Check the buffer pool (by using the hash table) to see if it contains 
+	the requested page. If the page is not in the pool, it should be brought in 
+	as follows: 
+	</font> 
+	<dl compact="compact">
+		<dt><font face="Times New Roman">(a) </font> </dt>
+		<dd><font face="Times New Roman">Choose a frame for replacement, using the 
+		LRU replacement policy. 
+		</font> 
+		</dd>
+		<dt><font face="Times New Roman">(b) </font> </dt>
+		<dd><font face="Times New Roman">If the frame chosen for replacement is dirty, <em>flush</em> it 
+		(i.e., write out the page that it contains to disk, using the 
+		appropriate DB class method). 
+		</font> 
+		</dd>
+		<dt><font face="Times New Roman">(c) </font> </dt>
+		<dd><font face="Times New Roman">Read the requested page (again, by calling the DB class) into the 
+		frame chosen for replacement; the <em>pin_count</em> and <em>dirtybit</em> 
+		for the frame should be initialized to 0 and FALSE, respectively. 
+		</font> 
+		</dd>
+		<dt><font face="Times New Roman">(d) </font> </dt>
+		<dd><font face="Times New Roman">Delete the entry for the old page from the Buffer Manager's hash 
+		table and insert an entry for the new page. Also, update the entry for 
+		this frame in the bufDescr array to reflect these changes. </font> </dd>
+	</dl>
+	</dd>
+	<dt><font face="Times New Roman">2. </font> </dt>
+	<dd><font face="Times New Roman"><em>Pin</em> the requested page by incrementing the <em>pin_count</em> 
+	in the descriptor for this frame. and return a pointer to the page to the 
+	requestor. </font> </dd>
+</dl>
+<p><strong>The LRU (Least Recently Used) replacement policy </strong><br>
+  To implement the LRU replacement policy, maintain a queue of frame numbers (of 
+the frames with <i>pin_count</i> 0). When a frame is to be chosen for 
+replacement, you should pick the first frame in this list. A frame number is 
+added to the end of the queue when the <em>pin_count</em> for the frame is 
+decremented to 0. A frame number is removed from the queue if the <em>pin_count</em> 
+becomes non-zero: this could happen if there is a request for the page currently 
+in the frame! <br>
+</p>
+<pre><span style="font-size: 16pt" lang="en-us"><b><span style="font-family: Arial">5. Error protocol</span></b></span></pre>
+<p>Though the Throwable class in Java contains a snapshot of the execution stack 
+of its thread at the time it was created and also a message string that gives 
+more information about the error (exception), we have decided to maintain a copy 
+of our own stack to have more control over the error handling. </p>
+<p>We provide the <em>chainexception</em> package to handle the Minibase 
+exception stack. Every exception created in your <em>bufmgr</em> package should 
+extend the ChainException class. The exceptions are thrown according to the 
+following rule: </p>
+<ul>
+	<li>
+	<p style="margin-top: 0; margin-bottom: 0">Error caused by an exception 
+	caused by another layer: </p></li>
+</ul>
+<blockquote>
+	<p style="margin-top: 0; margin-bottom: 0"><font size="3">For example: (when try to pin page 
+	from diskmgr layer)</font><font face="Arial Unicode MS" size="2"><br></font>
+	<font face="Courier New" size="2">try {<br>&nbsp;&nbsp;&nbsp; SystemDefs.JavabaseBM.pinPage(pageId, page, true);<br>}<br>catch (Exception e) {<br>&nbsp;&nbsp;&nbsp; throw new DiskMgrException(e, "DB.java: pinPage() failed");<br>}</font></p>
+</blockquote>
+<ul>
+	<li>
+	<p style="margin-top: 0; margin-bottom: 0">Error not caused by exceptions of 
+	others, but needs to be acknowledged:</p></li>
+</ul>
+<blockquote>
+	<p style="margin-top: 0; margin-bottom: 0">
+	<font size="3">For example: (when try to unpin a 
+	page that is not pinned)</font><font face="Arial Unicode MS" size="2"><br>
+	</font>
+	<font face="Courier New" size="2">if (pin_count == 0) {<br>
+&nbsp;&nbsp;&nbsp; throw new PageUnpinnedException (null, "BUFMGR: 
+	PAGE_NOT_PINNED.");<br>
+	}</font></p>
+</blockquote>
+<p>Basically, the ChainException class keeps track of all the exceptions thrown 
+across the different layers. Any exceptions that you decide to throw in your
+<em>bufmgr</em> package should extend the ChainException class. <br>
+For testing purposes, we ask you to throw the following exceptions in case of 
+error (use the exact same name, please): </p>
+<ul>
+	<li><font face="Times New Roman">BufferPoolExceededException <br>
+	Throw a BufferPoolExceededException when try to pin a page to the buffer 
+	pool with no unpinned frame left. </font></li>
+	<li><font face="Times New Roman">PagePinnedException <br>
+	Throw a PagePinnedException when try to free a page that is still pinned.
+	</font></li>
+	<li><font face="Times New Roman">HashEntryNotFoundException <br>
+	Throw a HashEntryNotFoundException when page specified by PageId is not 
+	found in the buffer pool. </font></li>
+</ul>
+<p>Feel free to throw other new exceptions as you see fit. But make sure that 
+you follow the error protocol when you catch an exception. Also, think carefully 
+about what else you need to do in the <em>catch</em> phase. Sometimes you do 
+need to unroll the previous operations when failure happens. </p>
+<pre><span style="font-size: 16pt" lang="en-us"><b><span style="font-family: Arial">6. What to Turn In</span></b></span></pre>
+<p>You should turn in copies of your code together with copies of the output 
+produced by running the test provided. </p>
+<div class="Section1">
+	<p class="MsoNormal">Turnin your <font face="Courier New" size="2">
+	project2part1</font> directory which has your own files 
+	including a README.txt file. In the readme file, put the name and login of your group 
+	members, and the features, assumptions or anything you would like me to know. I should be able to 
+	compile/run your program using make.</p>
+	<p class="MsoNormal">To turnin:</p>
+	<p class="MsoNormal">&nbsp;&nbsp;&nbsp; <font face="Courier New" size="2">turnin 
+	-c cs448 -p project2part1 project2part1</font></p>
+	<p class="MsoNormal">To verify:</p>
+	<p class="MsoNormal">&nbsp;&nbsp;&nbsp; <font face="Courier New" size="2">turnin 
+	-c cs448 -p project2part1 -v</font></p>
+	<p class="MsoNormal" style="line-height: 15pt">It should list all the files 
+	you have turned in. </p></div>
+ 
+</div> 
+
+  
+<div class="MsoNormal" style="text-align:center;line-height:15.0pt;  
+mso-line-height-rule:exactly" align="center"><span style="font-size:10.0pt;  
+mso-fareast-font-family:&quot;Times New Roman&quot;" lang="EN-US">  
+  
+<hr size="2" width="100%" align="center">  
+  
+</span></div>  
+  
+<p class="MsoNormal" style="margin-top:12.0pt;margin-right:0in;margin-bottom:  
+3.0pt;margin-left:0in;line-height:15.0pt;mso-line-height-rule:exactly;  
+mso-outline-level:2" align="center"><b>
+	<font style="font-size: 22pt" face="Arial">PART</font></b><font face="Arial"><b style=""><span style="font-size: 22pt;"> 
+	2: Heap Files (50 points)</span></b></font><span lang="en-us"><b><span style="font-family: Arial"><font size="6"> <br>
+</font></span></b></span></p>
+<p class="MsoNormal" style="margin-top:12.0pt;margin-right:0in;margin-bottom:  
+3.0pt;margin-left:0in;line-height:15.0pt;mso-line-height-rule:exactly;  
+mso-outline-level:2"><b style="mso-bidi-font-weight:normal">
+<span style="font-size:16.0pt;mso-bidi-font-size:10.0pt;font-family:Arial;layout-grid-mode:  
+line" lang="EN-US">1. Introduction</span></b></p>    
+  
+<p>In this part, you will implement the Heap file layer. You will be given the 
+documentation for the lower layers (Buffer Manager and Disk Space Manager), as 
+well as the documents for managing records on a Heap file page. You can find the 
+package index for the above <a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project2/files/javadoc2/packages.html">here</a>. </p>
+<p>This assignment has three parts. You have to do the following: </p>
+<dl compact="compact">
+	<dt>1. </dt>
+	<dd><font face="Times New Roman">Familiarize yourself with the Heap file, 
+	HFPage, Buffer Manager and Disk Space Manager interfaces. </font></dd>
+	<dt><font face="Times New Roman">2. </font></dt>
+	<dd><font face="Times New Roman">Implement the Heap file class. You can 
+	ignore concurrency control and recovery issues, and concentrate on 
+	implementing the interface routines. You should deal with free space 
+	intelligently, using either a linked list or page directory to identify 
+	pages with room for records. When a record is deleted, you must update your 
+	information about available free space, and when a record is inserted, you 
+	must try to use free space on existing pages before allocating a new page.
+	</font></dd>
+	<dt><font face="Times New Roman">3. </font></dt>
+	<dd><font face="Times New Roman">Run the tests provided. </font></dd>
+</dl>
+<p><b style="mso-bidi-font-weight:normal">
+<span style="font-size:16.0pt;mso-bidi-font-size:10.0pt;font-family:Arial;layout-grid-mode:  
+line" lang="EN-US">2. Available Documentation</span></b></p>
+<p>You should begin by reading the chapter on Disks and Files, 
+to get an overview of the HF layer and buffer management. In addition, HTML 
+documentation is available for
+<a href="http://www.cs.wisc.edu/coral/minibase/minibase.html">Minibase</a>.</p>
+<p><b style="mso-bidi-font-weight:normal">
+<span style="font-size:16.0pt;mso-bidi-font-size:10.0pt;font-family:Arial;layout-grid-mode:  
+line" lang="EN-US">3. Classes to Familiarize Yourself With First</span></b></p>
+<p>There are three main packages with which you should familiarize yourself: <em>
+heap, bufmgr, diskmgr</em>. Note that part of the <em>heap</em> package contains 
+implementation for HFPage. The java documentation of HFPage is provided to you. 
+A Heap file is seen as a collection of records. Internally, records are stored 
+on a collection of HFPage objects. </p>
+<p><b style="mso-bidi-font-weight:normal">
+<span style="font-size:16.0pt;mso-bidi-font-size:10.0pt;font-family:Arial;layout-grid-mode:  
+line" lang="EN-US">4. Compiling Your Code and Running the Tests</span></b></p>
+<p>Copy this file (<a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project2/files/project2part2.tar.gz">project2part2.tar.gz</a>) to your own local directory and study them 
+carefully. The files are: </p>
+<p>&nbsp;- In directory src/heap:</p>
+<ul>
+	<li><font face="Times New Roman"><em>Makefile:</em> A sample Makefile for 
+	you to compile your project. Study this carefully before you make changes. 
+	Don't forget to configure the classpath to your code to the packages you may 
+	need. </font></li>
+	<li><font face="Times New Roman">Again, the java documentation for packpage
+	<em>bufmgr, diskmgr</em> and <em>heap</em> are online. <br>
+	<em>Note that you DO NOT have to throw the same exceptions as</em> <em>
+	documented for the heap package. However, for testing</em> <em>purpose, we 
+	DO ask you to name one of your exceptions</em> <em>InvalidUpdateException to 
+	signal any illegal operations</em> <em>on the record. In other error 
+	situations, you should</em> <em>throw exceptions as you see fit following 
+	the error protocol</em> <em>introduced in the Buffer Manager Assignment.</em>
+	</font></li>
+</ul>
+<p>&nbsp;- In directory src/tests: This directory contains the source code of 
+the test and also the Makefile to compile/execute the test. Make the required 
+changes.</p>
+<p>&nbsp;- In directory lib:</p>
+<ul>
+	<li><font face="Times New Roman"><em>heapAssign.jar:</em>&nbsp; this is a 
+	library that has the implementation of the Disk Manager and Buffer Manager 
+	layers. As you know, you will develop the Buffer Manager layer in the first 
+	part of this project. We are providing this library to help you start 
+	working with the second part as soon as possible and also to help you test 
+	your code comparing the behavior of your code with the one obtained used the 
+	library. The final goal is to make the system work without using this 
+	library and using your code instead. </font></li>
+</ul>
+<p><b style="mso-bidi-font-weight:normal">
+<span style="font-size:16.0pt;mso-bidi-font-size:10.0pt;font-family:Arial;layout-grid-mode:  
+line" lang="EN-US">5. What to Turn</span></b></p>
+<p>You should turn in copies of your code together with copies of the output 
+produced by running the test provided.&nbsp; </p>
+<div class="Section1">
+	<p class="MsoNormal">Turnin your src directory with all your own files 
+	including a README.txt file. In the readme file, put the name of your group 
+	members, and the features, assumptions or anything you would like me to know and any comments about the 
+	compilation/execution of your code. I should be able to 
+  compile/run your program using make.</p>
+	<p class="MsoNormal">To turnin:</p>
+	<p class="MsoNormal">&nbsp;&nbsp;&nbsp; <font face="Courier New" size="2">turnin 
+	-c cs448 -p project2part2 project2part2</font></p>
+	<p class="MsoNormal">To verify:</p>
+	<p class="MsoNormal">&nbsp;&nbsp;&nbsp; <font face="Courier New" size="2">turnin 
+	-c cs448 -p project2part2 -v</font></p>
+	<p class="MsoNormal" style="line-height: 15pt">It should list all the files 
+	you have turned in. </p></div>
+
+
+
+
+  </body>
+</html>
+

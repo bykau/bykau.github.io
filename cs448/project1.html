@@ -1,0 +1,125 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>CS 44800: Project 1</title>
+  </head>
+  <body>
+<h1>Project 1</h1>
+<font color="red">Due: Sunday, March 1, 11:59 pm</font><br>
+(no late submission is accepted, solutions will be released after the due date)
+    <h2>Introduction</h2>
+<p>Each student has to do this project individually. You are going to use Oracle to perform some queries. The schema and sample data of the database are provided. The project should be done in CS sun workstations.</p>
+
+<p>Information about getting your Oracle account and general initial configuration is available in: <a href="http://www.cs.purdue.edu/oracle">http://www.cs.purdue.edu/oracle</a></p>
+<p>Information about Oracle SQL: <a href="http://docs.oracle.com/database/121/nav/portal_4.htm">http://docs.oracle.com/database/121/nav/portal_4.htm</a></p>
+
+<h2>Assignment</h2>
+<p>In this project you will use the attached file: <a href="/homes/sbykau/cs448/project1.sql">project1.sql</a>. Copy this file into your working directory. Create and populate the tables by command
+
+     <pre><code>SQL>@project1</code></pre>  
+
+<p>The following section shows the schema of the database. Study the schema carefully.
+A mail-order database consisting of the relations defined in the six-schemes as follows:<p>
+<p>
+<pre><code>
+WORKERS( WNO, WNAME, ZIP, HDATE )
+
+PARTS( PNO, PNAME, QOH, PRICE, OLEVEL )
+
+CUSTOMERS( CNO, CNAME, STREET, ZIP, PHONE )
+
+ORDERS( ONO, CNO, WNO, RECEIVED, SHIPPED )
+
+ODETAILS( ONO, PNO, QTY, SFEE )
+
+ZIPCODES( ZIP, CITY )
+</code></pre>
+</p>
+
+<p>
+<ul>
+<li>The WORKERS relation contains information about the workers of the company. The WNO attribute is the primary key. The ZIP attribute is a foreign key referring to the ZIPCODES table.</li>
+<li>The PARTS relation keeps a record of the inventory of the company. The record for each part includes its number and name as well as the quantity on hand, the unit price, and the reorder level. PNO is the primary key for this relation.</li>
+<li>The CUSTOMERS relation contains information about the customers of the mail-order company. Each customer is assigned a customer number, CNO, which serves as the primary key. The ZIP attribute is a foreign key referring to the ZIPCODES relation.</li>
+<li>The ORDERS relation contains information about the orders placed by customers, the workers who took the orders, and the dates the orders were received and shipped. ONO is the primary key. The CNO attribute is a foreign key referring to the CUSTOMERS table and the WNO attribute is a foreign key referring to the WORKERS table.</li>
+<li>The ODETAILS relation contains information about the various parts ordered by the customer within a particular order, and the shipping fee of that order. The combination of the ONO and PNO attributes forms the primary key. The ONO attribute is a foreign key referring to the ORDERS relation, and the PNO attribute is a foreign key referring to the PARTS relation.</li>
+<li>The ZIPCODES relation maintains information about the zip codes for various cities. ZIP is the primary key.</li>
+
+
+</ul>
+
+
+</p>
+
+<h2>Queries</h2>
+<p>Write SQL queries that answer the questions below (one query per question) and run them on the Oracle system. The query answers should be duplicate-free, but you should use distinct only when necessary. If you are making any assumptions, state them clearly, and document your queries.</p>
+<p>
+<ol>
+<li>Get the names of customers who have placed the most expensive orders. Please note that an order could include many parts. Shipping fees should be included.</li>
+<li>Get the maximum waiting time for all orders in number of days. The waiting time for an order is defined as the difference between the shipped date and the received date. Note: Assume that all order events happen at the same time every day, say 12:00AM. This should exclude those orders that have shipped date unconfirmed.</li>
+<li>Get the numbers and names of workers who have only made a sale to a customer living in the same zip code as the workers.</li>
+<li>For each reorder level, print the level number OLEVEL, the average quantity on hand, the maximum and minimum quantity on hand of parts for that level, and the number of parts in that level.</li>
+<li>Find the months of year 1995 that witness the lowest sales (including shipping fees). The months should be in MON format (i.e. JAN, FEB, etc.)</li>
+<li>Print the pairs of parts that are bought together the least. A pair of parts is bought together when the same customer (regardless of the time) orders them.</li>
+<li>The shipping fee could be 0.0 (free shipping) or greater than 0 (customers pay extra fees). Print the PNAME and QOH of part for which customers want to pay shipping fees the least. This is defined as the ratio of the number of times that part is ordered with a shipping fee over the total number of times it is ordered. Also, print the total shipping cost of all orders of that part. If many parts have the same value, print them all.</li>
+<li>For each part, define the downfall time as the longest number of days between any two consecutive times the part is ordered. Print all the PNAME and QUANTITY ON HAND of all parts with their downfall time, sorted by their downfall time, from highest to lowest. Ignore parts that are ordered just one time.</li>
+<li>Find the names of parts that are ordered by someone who buys more than 2 other parts.</li>
+<li>Find the month that has the lowest average sales over the years. The sales of a month should include all orders and shipping fees during that month. If many months have the same average sales, print them all. The month should be in MON format. Please also print the lowest average sales along with the selected month(s).</li>
+</ol>
+</p>
+
+<h2>Drop</h2>
+<p>Note that project1.sql cleans all tables so you can recreate a cleaned instance by running project1.sql. To see all objects owned by the current user run SELECT * FROM USER_CATALOG</p>
+
+<h2>A useful strategy</h2>
+<p>Here is a useful approach for doing the project.</p>
+<p>
+<ul>
+<li>Follow the introduction about environment setup, connect to the Oracle server with your assigned Oracle account.</li>
+
+<li>Try a few simple SQL statements until you are comfortable interacting with sqlplus.</li>
+
+<li>Work out the SQL statements you need to solve the above queries.</li>
+
+<li>Use a text editor you are familiar with to create a .sql file that contains the necessary SQL statements for this project.</li>
+
+<li>Test your .sql file.</li>
+
+<li>Please add these lines to the beginning of your .sql file:
+
+    <p>rem CS 448 SQLPLUS Project1    </p>            
+
+    <p>rem Your_first_name Your_last_name  </p>
+
+    <p>so that the TA can assign the grades.</p>
+</li>
+<li>Remember to divide and conquer. Test your .sql file continuously as you add new SQL statements. You can use the Oracle command spool to direct the output to a file so that you can check it. However, please DO NOT submit the output file, DO NOT include spool in your .sql file.</li>
+</ul>
+</p>
+
+<h2></h2>What to submit</p>
+<p>The result of the work is a file named your_career_login.sql which contains all the SQL statements you used in this assignment. Not naming your file as your_career_login.sql will cost you several points.</p>
+
+<p>How to submit your .sql file</p>
+
+<p>After you are satisfied that your .sql file does exactly what the Project requires, you can turnin your .sql file to be graded.</p>
+
+<p>
+<ul>
+<li>Make sure you are in the directory where your .sql file is.</li>
+
+<li>Run the following UNIX command(use 'man turnin' to know more about turnin) :
+
+        <pre><code>turnin -c cs448 -p project1 your_career_login.sql </code></pre></li>
+
+<p>If you failed to turnin in time, email your submission to xu647@purdue.edu or ganapathy@purdue.edu.</p>
+
+<p>The turnin program puts a time stamp on your submission. At 11:59 pm on the deadline date, submission will be locked out.</p>
+
+<p>Please note that each student should submit his/her own project. Your submission is deposited into a file stored under your career login ID. A later submission will overwrite the previous submission.</p>
+</ul>
+</p>
+  </body>
+</html>
+

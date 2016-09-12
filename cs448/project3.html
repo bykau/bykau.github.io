@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Project 3 - Relational Operators (CS448 Spring 2015)</title>
+  <style>
+  .commands
+  {
+    margin: 10px;
+    border: black 1px solid;
+    padding: 3px;
+    background-color: #ffffc0;
+  }
+  div.MsoNormal {mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:??;}
+div.Section1 {page:Section1;}
+li.MsoNormal {mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:??;}
+p.MsoNormal {mso-style-parent:"";
+	margin:0in;
+	margin-bottom:.0001pt;
+	mso-pagination:widow-orphan;
+	font-size:12.0pt;
+	font-family:"Times New Roman";
+	mso-fareast-font-family:??;}
+  </style>
+</head> 
+<body>
+<h1 align="center"><b>
+<span style="font-size: 22pt; font-family: &quot;Helvetica&quot;,&quot;sans-serif&quot;; color: black;">
+CS448 Project 3 - Relational Operators</span></b></h1>
+
+<p>
+In this project you will implement half a dozen relational operators, which form
+the basis for the Minibase query processor. The underlying layers and other
+framework classes are provided with the skeleton code. <strong>Before jumping
+into this project, make sure you thoroughly understand <u>sections 12.3, 12.4,
+and 14.4.3 (pages 400 to 409, and 463 to 464)</u> of the textbook.</strong>
+</p>
+
+Due:
+<ul>
+  <li><strong><font color="#FF0000">Sunday, April 26, 11:59 pm</font></strong></li>
+</ul>
+
+Notes:
+<ul>
+  <li>If you do not find a makefile, please create your own makefile. Use the project 2 makefile as the reference. </li>
+  <li>This project will be carried out in groups of two</li>
+  <li>We use software to scan for cheating, so don't do it!</li>
+  <li>It should go without saying, but <strong>START EARLY!</strong></li>
+</ul>
+
+<p><em>
+Special Advice:<br>
+Part three is significantly more challenging than the first two parts combined.
+You may find the best way to divide the workload for this project is to work on
+each part together, so that both of you have enough background to contribute to
+part three.
+</em></p>
+<hr>
+<h2>Part 1: From Records to Tuples</h2>
+
+<p>
+As you have learned in class, a typical optimizer breaks down queries into trees
+of relational operators, implemented as iterators. The iterators (i.e. <a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/heap/HeapScan.html"><code>HeapScan</code></a>
+and <a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/index/HashScan.html"><code>HashScan</code></a>) deal with
+file access directly, and simply return records or their ids. In this project,
+you will use a higher-level view of these records with the provided classes
+<a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/relop/Schema.html"><code>Schema</code></a> and
+<a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/relop/Tuple.html"><code>Tuple</code></a>. Each relational
+operator you will implement inherits the abstract class
+<a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/relop/Iterator.html"><code>Iterator</code></a>, which
+contains a schema and requires the following methods:
+</p>
+
+<blockquote>
+<table class="commands">
+  <tr>
+    <td><code>
+    <em><font color="blue">protected</font> Schema <strong><font color="green">schema</font></strong></em><br>
+    <br>
+    <font color="blue">public void</font> <strong>restart</strong>()<br>
+    <font color="blue">public boolean</font> <strong>isOpen</strong>()<br>
+    <font color="blue">public void</font> <strong>close</strong>()<br>
+    <br>
+    <font color="blue">public boolean</font> <strong>hasNext</strong>()<br>
+    <font color="blue">public</font> Tuple <strong>getNext</strong>()<br>
+    </code></td>
+  </tr>
+</table>
+</blockquote>
+
+Your first task is to implement the following wrappers for the <code>heap</code>
+and <code>index</code> scans:
+<ol>
+  <li><p>
+    <strong><font color="blue">FileScan</font></strong><br>
+    A <code>HeapScan</code> that returns <code>Tuples</code> instead of <code>byte[]</code>'s
+  </p></li>
+  <li><p>
+    <strong><font color="blue">KeyScan</font></strong><br>
+    A <code>HashScan</code> that returns <code>Tuples</code> instead of <code>RID</code>s
+  </p></li>
+  <li><p>
+    <strong><font color="blue">IndexScan</font></strong><br>
+    A <code>BucketScan</code> (see part 3) that likewise returns <code>Tuples</code>
+  </p></li>
+</ol>
+
+Some useful hints and tips:
+<ul>
+  <li><p>
+    Each constructor should initialize the inherited field <code>schema</code>.<br>
+    <em>(i.e. it's given as a parameter to these three iterators)</em>
+  </p></li>
+  <li><p>
+    The difficult thing about part 1 is figuring out all the provided code.<br>
+    <em>(i.e. don't be surprised by how little code these classes require)</em>
+  </p></li>
+</ul>
+
+<hr>
+<h2>Part 2: Primitive Operators (60 %)</h2>
+
+<p>
+Now that you have the basic leaf nodes of most query trees, you can make some
+more interesting iterators. Your next task is to implement the three
+fundamental operations of relational algebra:
+</p>
+
+<ol>
+  <li><p>
+    <strong><font color="blue">Selection</font></strong><br>
+    Filters another iterator on a set of <a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/relop/Predicate.html"><code>Predicate</code></a>s<br>
+    <em>(i.e. simply call <code>evaluate()</code> on each one)</em>
+  </p></li>
+  <li><p>
+    <strong><font color="blue">Projection</font></strong><br>
+    Removes (projects) columns from another iterator
+  </p></li>
+  <li><p>
+    <strong><font color="blue">SimpleJoin</font></strong><br>
+    More commonly known as "Nested Loops Join"
+  </p></li>
+</ol>
+
+Some more useful hints and tips:
+<ul>
+  <li><p>
+    The tricky part of this project is transforming the algorithms in the book into iterators.<br>
+    <em>(i.e. in each iterator class, you will need to save some sort of state in data fields)</em>
+  </p></li>
+  <li><p>
+    Please notice the <code>join</code> methods in the <code>Schema</code> and <code>Tuple</code> classes.<br>
+    <em>(i.e. you will make use of them when writing your <code>SimpleJoin</code>)</em>
+  </p></li>
+</ul>
+
+<hr>
+<h2>Part 3: Hash-Based Join (40 %)</h2>
+
+<p><em>
+</em>Your next task is to implement one final iterator (hopefully for the semester),
+namely <strong><font color="blue">HashJoin</font></strong>. To do this, you will
+require a couple of supporting classes. First, you need a way to scan an
+<em>entire</em> hash index, bucket by bucket. Fortunately, you are provided with
+<a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/index/BucketScan.html"><code>BucketScan</code></a>, a new
+iterator in the <code>index</code> package. </p>
+<p>
+  Second, you need a good in-memory hash table for storing partitions during the
+  "probing phase" (see figure 14.12, page 464). Java's built-in <code>Hashtable</code>
+  works great, except by design it doesn't support duplicate keys. To get around
+  this, you are provided with the class
+  <a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/relop/HashTableDup.html"><code>HashTableDup</code></a>,
+  which has been customized for <code>SearchKey</code>s and <code>Tuple</code>s.
+</p>
+
+For efficiency in hash joins, you must consider the following:
+<ul>
+  <li><p>
+    If the left and/or right node is an index scan, don't rebuild the index.<br>
+    <em>(i.e. just make use of what the query optimizer already gave you)</em>
+  </p></li>
+  <li><p>
+    If the left and/or right node is a file scan, don't copy the file(s).<br>
+    <em>(i.e. just build temporary hash indexes where needed)</em>
+  </p></li>
+</ul>
+
+<hr>
+<h2>Getting Started</h2>
+
+<p>
+Skeleton code and documentation is available <a href="project3.tar.gz">here</a>. Note that this code is a complete starting point for the project, i.e. the <code>bufmgr</code>, <code>heap</code>, and <code>index</code> packages are
+provided for you (in jar files). <strong>Note that the minibase code used in this project is slightly different than the one used in the previous project, e.g., the order of parameters in some of the Buffer Manager's methods may be different</strong>. The attached zip file containes also the documentation of the modified minibase system.</p>
+<p>
+  To test your code, simply run the provided
+  <a href="https://www.cs.purdue.edu/homes/sunil/courses/cs448/Projects/Project3/javadocs/tests/ROTest.html"><code>ROTest</code></a> test driver. You
+  should try to minimize the number of reads, writes, and allocations needed by
+  the test cases. 
+</p>
+
+<hr>
+<h2>Turnin</h2>
+<p>You should turn in copies of your code together with copies of the output 
+produced by running the test provided. </p>
+<div class="Section1">
+	<p class="MsoNormal">Turnin your <font face="Courier New" size="2">project3</font> 
+	directory which has your own files including a README.txt file. In the 
+	readme file, put the name and login of your group members, and the features, 
+	assumptions or anything you would like me to know. I should be able to 
+	compile/run your program using make. Only one person per group should turn 
+	in the files!</p>
+	<p class="MsoNormal">To turnin:</p>
+	<p class="MsoNormal">&nbsp;&nbsp;&nbsp; <font face="Courier New" size="2">turnin -c cs448 
+	-p project3 project3</font></p>
+	<p class="MsoNormal">To verify:</p>
+	<p class="MsoNormal">&nbsp;&nbsp;&nbsp; <font face="Courier New" size="2">turnin -c cs448 
+	-p project3 -v</font></p>
+	<p class="MsoNormal" style="line-height: 15pt;">It should list all the files 
+	you have turned in.</div>
+</body>
+</html>
+
